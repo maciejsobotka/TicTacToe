@@ -3,6 +3,7 @@ package tictactoe.gui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,11 +15,13 @@ import tictactoe.model.Symbols;
 
 public class TicTacToeGUI implements ActionListener{
 	
+	private JFrame frame;
 	private Game game;
 	private BoardGUI buttons;
+	private boolean end;
 	
 	public TicTacToeGUI() {
-		JFrame frame = new JFrame();
+		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(300, 300);
 		frame.setTitle("Tic-Tac-Toe");
@@ -35,32 +38,56 @@ public class TicTacToeGUI implements ActionListener{
 
 	public static void main(String[] args){
 		TicTacToeGUI tttGui = new TicTacToeGUI();
-		tttGui.playGame();
+		Random generator = new Random();
+		int starter = generator.nextInt(2);
+		if(starter == 1)
+			tttGui.playGame();
+	}
+	
+	private void gameInit()
+	{
+		frame.getContentPane().remove(buttons);
+		game = new Game();
+		buttons = new BoardGUI();
+		frame.getContentPane().add(BorderLayout.CENTER, buttons);
+		frame.revalidate();
+		frame.repaint();
+		
+		for(int i = 0; i < game.getSize(); ++i)
+			for(int j = 0; j < game.getSize(); ++j)
+				buttons.getButtonBoard()[i][j].addActionListener(this);
+		end = false;
 	}
 	
 	private void playGame() {
 		Field f = game.cpuMove();
 		showCpuMove(f);
-		checkWin(f, game.getCpuPlayer().getCpuSymbol());
+		if(checkWin(f, game.getCpuPlayer().getCpuSymbol()) == 0)
+			gameInit();
+			
 	}
 	
-	private void checkWin(int col, int row, Symbols s){
+	private int checkWin(int col, int row, Symbols s){
 		int win = game.checkIfWin(col, row, s);
 		if(win == 1){
+			end = true;
 			if(s == Symbols.Knot)
-				JOptionPane.showMessageDialog(null, "Komputer wygrywa.", "Przegrałeś!",
-					JOptionPane.INFORMATION_MESSAGE);
+				return JOptionPane.showConfirmDialog(null, "Rozpocząć nową grę?", "Przegrałeś!",
+					JOptionPane.YES_NO_OPTION);
 			if(s == Symbols.Cross)
-				JOptionPane.showMessageDialog(null, "Komputer przegrywa.", "Wygrałeś!",
-					JOptionPane.INFORMATION_MESSAGE);
+				return JOptionPane.showConfirmDialog(null, "Rozpocząć nową grę?", "Wygrałeś!",
+					JOptionPane.YES_NO_OPTION);
 		}
-		if(win == -1)
-			JOptionPane.showMessageDialog(null, "Remis.", "Remis!",
-					JOptionPane.INFORMATION_MESSAGE);
+		if(win == -1){
+			end = true;
+			return JOptionPane.showConfirmDialog(null, "Rozpocząć nową grę?", "Remis!",
+					JOptionPane.YES_NO_OPTION);
+		}
+		return 2;
 	}
 
-	private void checkWin(Field f, Symbols s){
-		checkWin(f.getCol(), f.getRow(), s);
+	private int checkWin(Field f, Symbols s){
+		return checkWin(f.getCol(), f.getRow(), s);
 	}
 
 	public void showCpuMove(Field f)
@@ -71,17 +98,20 @@ public class TicTacToeGUI implements ActionListener{
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JButton space = (JButton) e.getSource();
-		space.setText(Symbols.Cross.toString());
-		space.removeActionListener(this);
-		for(int i = 0; i < game.getSize(); ++i)
-			for(int j = 0; j < game.getSize(); ++j)
-			if(space == buttons.getButtonBoard()[i][j])
-			{
-				game.playerMove(i, j);
-				checkWin(i, j, Symbols.Cross);
-				break;
-			}
-		playGame();
+		if(!end){
+			JButton space = (JButton) e.getSource();
+			space.setText(Symbols.Cross.toString());
+			space.removeActionListener(this);
+			for(int i = 0; i < game.getSize(); ++i)
+				for(int j = 0; j < game.getSize(); ++j)
+				if(space == buttons.getButtonBoard()[i][j])
+				{
+					game.playerMove(i, j);
+					if(checkWin(i, j, Symbols.Cross) == 0)
+						gameInit();
+					break;
+				}
+		}
+		if (!end) playGame();
 	}
 }
