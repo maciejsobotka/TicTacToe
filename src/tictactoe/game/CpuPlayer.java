@@ -1,31 +1,41 @@
 package tictactoe.game;
 
-import java.util.Random;
-
 import tictactoe.model.Field;
 import tictactoe.model.Symbols;
 
-public class CpuPlayer {
-	Symbols cpuSymbol;
+/**
+ * Abstract class representing template for CPU player.
+ * 
+ * @author Maciej Sobótka
+ *
+ */
+public abstract class CpuPlayer {
+	protected Symbols cpuSymbol;
 	
+	//==========================================================================
+	// Constructors
+	/**
+	 * Non-parameterized constructor. Default CPU player sybol is O.
+	 */
 	public CpuPlayer(){
-		this.cpuSymbol = Symbols.Knot;
+		this.cpuSymbol = Symbols.NOUGHT;
 	}
-
-	public Field makeMove(Symbols[][] board)
-	{
-		Random generator = new Random();
-		while(true){
-			int i = generator.nextInt(board.length);
-			int j = generator.nextInt(board.length);
-			if (board[i][j] == null)
-			{
-				board[i][j] = cpuSymbol;
-				return new Field(i, j);
-			}
-		}
-	}
-		
+	
+	//=========================================================================
+	// Methods
+	/**
+	 * Method holding algorithm for choosing next field.
+	 * @param 	board	game board
+	 * @return	field to play next
+	 */
+	public abstract Field makeMove(Symbols[][] board);
+	
+	//=========================================================================
+	// Getters and Setters
+	/**
+	 * Gets CPU player symbol.
+	 * @return 	CPU player symbol
+	 */
 	public Symbols getCpuSymbol() {
 		return cpuSymbol;
 	}

@@ -3,6 +3,7 @@
 .gradle
 bin/
 tmp/
+doc/
 libs/
 *.tmp
 *.bak
